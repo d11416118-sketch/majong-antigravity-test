@@ -1,0 +1,124 @@
+.tile {
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+    width: 38px;
+    height: 54px;
+    min-height: 0;
+    border: 1px solid #d8ceb6;
+    border-radius: 6px;
+    padding: 0;
+    color: var(--ink);
+    background:
+        linear-gradient(145deg, #fffdf6 0%, #f2e4c7 100%);
+    box-shadow:
+        inset 0 -4px 0 rgba(120, 94, 56, 0.16),
+        0 2px 5px rgba(0, 0, 0, 0.22);
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+}
+
+.tile:disabled {
+    opacity: 1;
+}
+
+.tile-small {
+    width: 28px;
+    height: 38px;
+    border-radius: 5px;
+    font-size: 12px;
+}
+
+.tile-back {
+    border: 2px solid #ede3c8;
+    color: transparent;
+    background:
+        linear-gradient(135deg, #245a8d 0%, #153f66 100%);
+    box-shadow:
+        inset 0 0 0 4px rgba(255, 255, 255, 0.12),
+        0 2px 5px rgba(0, 0, 0, 0.24);
+}
+
+.tile-m {
+    color: #bd2d2d;
+}
+
+.tile-p {
+    color: #245a9b;
+}
+
+.tile-s {
+    color: #18744f;
+}
+
+.tile-z {
+    color: #1f2933;
+}
+
+.tile[data-tile="5z"],
+.tile[data-tile="6z"] {
+    color: #b83232;
+}
+
+.tile-f {
+    color: #9b5b12;
+}
+
+.tile.selectable {
+    position: relative;
+    cursor: pointer;
+    transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.tile.selectable:hover,
+.tile.selected {
+    transform: translateY(-10px);
+    border-color: var(--gold);
+    box-shadow:
+        inset 0 -4px 0 rgba(120, 94, 56, 0.16),
+        0 0 0 3px rgba(212, 154, 42, 0.32),
+        0 8px 12px rgba(0, 0, 0, 0.28);
+}
+
+.tile.recommended {
+    border-color: #30c8a0;
+    box-shadow:
+        inset 0 -4px 0 rgba(120, 94, 56, 0.16),
+        0 0 0 3px rgba(48, 200, 160, 0.46),
+        0 8px 12px rgba(0, 0, 0, 0.28);
+}
+
+.tile.animating-source {
+    opacity: 0.28;
+}
+
+.floating-tile {
+    position: fixed;
+    z-index: 1000;
+    margin: 0;
+    pointer-events: none;
+    transform-origin: center center;
+    will-change: transform, opacity;
+}
+
+.mode-3d .tile.selectable {
+    transform-style: preserve-3d;
+    box-shadow:
+        0 1px 0 #cdbb94,
+        0 2px 0 #bba981,
+        0 3px 0 #a9956d,
+        0 8px 10px rgba(0, 0, 0, 0.28);
+}
+
+.mode-3d .tile.selectable:hover,
+.mode-3d .tile.selected {
+    transform: translateY(-12px) translateZ(12px);
+}
+
+.mode-3d .tile.recommended {
+    transform: translateY(-8px) translateZ(10px);
+}
+

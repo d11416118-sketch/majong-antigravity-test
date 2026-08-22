@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#17604d">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="台灣麻將">
+    <title>台灣麻將線上牌桌</title>
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.webmanifest') }}">
+    <link rel="icon" href="{{ url_for('static', filename='icons/app-icon-32.png') }}" type="image/png" sizes="32x32">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/apple-touch-icon.png') }}" sizes="180x180">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tiles.css') }}">
+</head>
+
+<body class="mode-2d">
+    <main id="app-shell">
+        <section id="view-login" class="view auth-view">
+            <div class="auth-panel">
+                <h1>台灣麻將</h1>
+
+                <div id="auth-form" class="auth-form">
+                    <input id="input-username" type="text" maxlength="20" autocomplete="username" placeholder="帳號">
+                    <div class="password-wrapper">
+                        <input id="input-password" type="password" maxlength="64" autocomplete="current-password" placeholder="密碼">
+                        <button type="button" id="toggle-password-btn" class="toggle-password-btn" aria-label="顯示密碼" tabindex="-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon-off">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="eye-icon-on hidden">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="auth-error-message" class="auth-error-message hidden"></div>
+                    <div class="auth-button-row">
+                        <button id="btn-login" type="button">登入</button>
+                        <button id="btn-register" type="button">註冊</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-home" class="view home-view hidden">
+            <div class="home-shell">
+                <aside class="profile-panel">
+                    <button id="profile-card" class="profile-card-button" type="button" aria-haspopup="dialog">
+                        <span id="profile-card-avatar" class="profile-card-avatar">?</span>
+                        <span class="profile-card-main">
+                            <strong id="profile-card-name">---</strong>
+                            <span id="profile-card-rank">一段 0 分</span>
+                        </span>
+                        <span class="profile-card-side">
+                            <strong id="profile-card-coins">0</strong>
+                            <span id="profile-card-record">0 勝 / 0 場</span>
+                        </span>
+                    </button>
+                    <div
+                        id="lobby-character"
+                        class="character-frame"
+                        data-model-url="{{ url_for('static', filename='models/lobby-character.glb') }}"
+                        data-model-default="{{ url_for('static', filename='models/lobby-character.glb') }}"
+                        data-model-flair="{{ url_for('static', filename='models/flair.fbx') }}"
+                    >
+                        <canvas id="lobby-character-canvas" aria-label="大廳角色模型"></canvas>
+                        <div class="character-placeholder">角色</div>
+                        <div class="character-loading">載入中</div>
+                    </div>
+                    <div id="character-options" class="character-options" role="radiogroup" aria-label="人物選擇"></div>
+                    <div class="profile-lines">
+                        <span>玩家</span>
+                        <strong id="home-player-name">---</strong>
+                        <span>金幣</span>
+                        <strong id="home-player-coins">0</strong>
+                        <span>戰績</span>
+                        <strong id="home-player-record">0 勝 / 0 場</strong>
+                        <span>段位</span>
+                        <strong id="home-player-rank">一段 0</strong>
+                    </div>
+                </aside>
+
+                <section class="home-menu">
+                    <article class="home-card theme-card">
+                        <header>
+                            <h2>主題風格</h2>
+                            <span id="theme-status">經典翠綠</span>
+                        </header>
+                        <div id="theme-options" class="theme-options" role="radiogroup" aria-label="介面主題選擇"></div>
+                        <p class="theme-note">完整介面只影響自己；房內玩家會看到你的主題名牌。</p>
+                    </article>
+
+                    <article class="home-card">
+                        <header>
+                            <h2>匹配模式</h2>
+                            <span id="matchmaking-status">等待加入</span>
+                        </header>
+                        <button id="btn-matchmaking" type="button">開始匹配</button>
+                        <button id="btn-leave-matchmaking" class="secondary-button hidden" type="button">取消匹配</button>
+                    </article>
+
+                    <article class="home-card ranked-card">
+                        <header>
+                            <h2>牌位模式</h2>
+                            <span id="ranked-status">隊伍 0/4</span>
+                        </header>
+                        <button id="btn-ranked" type="button">開始牌位</button>
+                        <button id="btn-leave-ranked" class="secondary-button hidden" type="button">離開牌位</button>
+                    </article>
+
+                    <article class="home-card reward-card">
+                        <header>
+                            <h2>金幣任務</h2>
+                            <span id="reward-status">待領取</span>
+                        </header>
+                        <div class="reward-actions">
+                            <button id="btn-daily-checkin" type="button">簽到 +3</button>
+                            <div class="online-reward">
+                                <span>在線</span>
+                                <strong id="online-reward-countdown">30:00</strong>
+                            </div>
+                        </div>
+                        <div class="rename-row">
+                            <input id="display-name-input" type="text" maxlength="20" placeholder="暱稱">
+                            <button id="btn-display-name" type="button">改名</button>
+                        </div>
+                        <div id="task-list" class="task-list"></div>
+                    </article>
+
+                    <article class="home-card">
+                        <header>
+                            <h2>自訂模式</h2>
+                            <span>房主設定</span>
+                        </header>
+                        <label class="setting-line">
+                            <input id="custom-track-stats" type="checkbox">
+                            <span>計入戰績與金幣</span>
+                        </label>
+                        <label class="setting-line">
+                            <span>底注</span>
+                            <input id="custom-base-stake" type="number" min="1" max="999" value="10">
+                        </label>
+                        <div class="room-action-row">
+                            <button id="btn-custom-create" type="button">開房</button>
+                            <button id="btn-test-room" class="test-room-btn" type="button">測試開房</button>
+                        </div>
+                        <div class="join-row">
+                            <input id="input-room-code" type="text" inputmode="numeric" maxlength="6" placeholder="房號">
+                            <button id="btn-custom-join" type="button">加入</button>
+                        </div>
+                    </article>
+
+                    <article class="home-card social-card">
+                        <header>
+                            <h2>好友</h2>
+                            <span id="social-status">0 位</span>
+                        </header>
+                        <div class="social-search">
+                            <input id="friend-username" type="text" maxlength="20" placeholder="玩家帳號">
+                            <button id="btn-friend-add" type="button">邀請</button>
+                        </div>
+                        <div id="friend-requests" class="social-list"></div>
+                        <div id="friend-list" class="social-list"></div>
+                    </article>
+
+                    <article class="home-card history-card">
+                        <header>
+                            <h2>歷史戰績</h2>
+                            <span id="history-profile-name">自己的紀錄</span>
+                        </header>
+                        <div class="history-search">
+                            <input id="history-username" type="text" maxlength="20" placeholder="查詢玩家帳號">
+                            <button id="btn-history-search" type="button">查詢</button>
+                            <button id="btn-history-self" class="secondary-button" type="button">自己</button>
+                        </div>
+                        <div id="history-results" class="history-results"></div>
+                    </article>
+                </section>
+            </div>
+        </section>
+
+        <section id="view-lobby" class="view lobby-view hidden">
+            <div class="lobby-panel">
+                <header>
+                    <span>房號</span>
+                    <strong id="lobby-room-id">------</strong>
+                </header>
+                <div id="lobby-room-settings" class="lobby-room-settings"></div>
+                <div id="lobby-player-list" class="lobby-list"></div>
+                <div id="lobby-status" class="lobby-status"></div>
+                <div class="lobby-room-actions">
+                    <button id="lobby-dissolve-room-button" class="danger-room-button hidden" type="button">解散房間</button>
+                    <button id="lobby-leave-room-button" class="danger-room-button" type="button">退出房間</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-game" class="game-view hidden">
+            <header class="game-topbar">
+                <div>
+                    <span>房號</span>
+                    <strong id="game-room-id">------</strong>
+                </div>
+                <div>
+                    <span>牌牆</span>
+                    <strong id="wall-count">0</strong>
+                </div>
+                <div>
+                    <span>局況</span>
+                    <strong id="match-progress">東一局</strong>
+                </div>
+                <div>
+                    <span>倒數</span>
+                    <strong id="decision-countdown">--</strong>
+                </div>
+                <button id="beginner-toggle" type="button">新手 OFF</button>
+                <button id="knowledge-toggle" type="button">資訊</button>
+                <button id="chat-toggle" type="button">聊天</button>
+                <button id="ai-toggle" type="button">AI OFF</button>
+                <button id="view-mode-toggle" type="button">3D</button>
+                <button id="dissolve-room-button" class="danger-room-button hidden" type="button">解散房間</button>
+                <button id="leave-room-button" class="danger-room-button" type="button">退出牌桌</button>
+            </header>
+
+            <div id="turn-status-banner" class="turn-status-banner" data-phase="idle" role="status" aria-live="polite">
+                <strong id="turn-status-title">等待牌局開始</strong>
+                <span id="turn-status-detail">系統會在這裡顯示目前由誰操作</span>
+            </div>
+
+            <div class="game-main">
+                <div id="table-stage">
+                    <canvas
+                        id="game-characters-canvas"
+                        aria-hidden="true"
+                        data-model-url="{{ url_for('static', filename='models/lobby-character.glb') }}"
+                    ></canvas>
+                    <div id="game-table">
+                        <div class="seat seat-bottom" data-seat="bottom"></div>
+                        <div class="seat seat-right" data-seat="right"></div>
+                        <div class="seat seat-top" data-seat="top"></div>
+                        <div class="seat seat-left" data-seat="left"></div>
+                        <div id="table-center">
+                            <div id="match-scoreboard" class="match-scoreboard"></div>
+                            <div id="turn-indicator"></div>
+                            <div id="last-discard"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <aside id="knowledge-panel" class="knowledge-panel hidden">
+                    <section>
+                        <header>歷史</header>
+                        <div id="history-list" class="history-list"></div>
+                    </section>
+                    <section>
+                        <header>算牌</header>
+                        <div id="tile-tracker" class="tile-tracker"></div>
+                    </section>
+                </aside>
+
+                <aside id="chat-panel" class="chat-panel hidden">
+                    <header>聊天</header>
+                    <div id="chat-list" class="chat-list"></div>
+                    <div id="sticker-row" class="sticker-row">
+                        <button type="button" data-sticker-id="hu">胡了</button>
+                        <button type="button" data-sticker-id="zimo">自摸</button>
+                        <button type="button" data-sticker-id="nice">好牌</button>
+                        <button type="button" data-sticker-id="wait">差一張</button>
+                        <button type="button" data-sticker-id="thinking">思考中</button>
+                    </div>
+                    <div class="chat-compose">
+                        <input id="chat-input" type="text" maxlength="180" autocomplete="off" placeholder="輸入訊息">
+                        <button id="chat-image-button" type="button">圖</button>
+                        <button id="chat-send-button" type="button">送出</button>
+                        <input id="chat-image-input" class="hidden" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+                    </div>
+                </aside>
+            </div>
+
+            <footer class="game-controls">
+                <div id="action-bar"></div>
+                <button id="discard-button" type="button" disabled>出牌</button>
+            </footer>
+        </section>
+    </main>
+
+    <div id="toast" class="toast hidden"></div>
+    <div id="end-game-overlay" class="end-overlay hidden"></div>
+    <div id="profile-home-overlay" class="profile-home-overlay hidden" aria-hidden="true">
+        <section class="profile-home-panel" role="dialog" aria-modal="true" aria-labelledby="profile-home-title">
+            <header class="profile-home-header">
+                <div>
+                    <span>個人主頁</span>
+                    <h2 id="profile-home-title">---</h2>
+                    <p id="profile-home-subtitle">---</p>
+                </div>
+                <button id="profile-home-close" class="icon-close-button" type="button" aria-label="關閉">×</button>
+            </header>
+
+            <div class="profile-home-grid">
+                <section class="profile-home-section rank-section">
+                    <header>
+                        <span>段位</span>
+                        <strong id="profile-home-rank">一段</strong>
+                    </header>
+                    <div class="rank-progress-track">
+                        <div id="profile-home-rank-progress" class="rank-progress-fill"></div>
+                    </div>
+                    <p id="profile-home-rank-progress-text">0 分</p>
+                </section>
+
+                <section class="profile-home-section stats-section">
+                    <header>
+                        <span>總覽</span>
+                    </header>
+                    <div class="profile-stat-grid">
+                        <div>
+                            <span>金幣</span>
+                            <strong id="profile-home-coins">0</strong>
+                        </div>
+                        <div>
+                            <span>總戰績</span>
+                            <strong id="profile-home-record">0 勝 / 0 場</strong>
+                        </div>
+                        <div>
+                            <span>牌位戰績</span>
+                            <strong id="profile-home-ranked-record">0 勝 / 0 場</strong>
+                        </div>
+                        <div>
+                            <span>角色</span>
+                            <strong id="profile-home-character">預設</strong>
+                        </div>
+                        <div>
+                            <span>主題</span>
+                            <strong id="profile-home-theme">經典翠綠</strong>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="profile-home-section recent-section">
+                    <header>
+                        <span>最近牌局</span>
+                    </header>
+                    <div id="profile-home-recent" class="profile-home-recent"></div>
+                </section>
+            </div>
+        </section>
+    </div>
+    <div id="orientation-warning" aria-hidden="true">
+        <strong>請旋轉手機</strong>
+        <span>橫向畫面比較適合牌桌操作</span>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/socket.io.js') }}"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "{{ url_for('static', filename='vendor/three/three.module.js') }}",
+                "three/addons/": "{{ url_for('static', filename='vendor/three/addons/') }}"
+            }
+        }
+    </script>
+    <script type="module" src="{{ url_for('static', filename='js/lobby-character.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>

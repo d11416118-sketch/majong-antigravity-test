@@ -1,0 +1,22 @@
+services:
+  mahjong:
+    build:
+      context: .
+    ports:
+      - "${PORT:-5001}:5001"
+    environment:
+      HOST: 0.0.0.0
+      PORT: 5001
+      SECRET_KEY: "${SECRET_KEY:-local-mahjong-only}"
+      MAHJONG_DB_PATH: /app/data/mahjong.db
+      AI_PROVIDER: "${AI_PROVIDER:-ollama}"
+      AI_MAX_CONCURRENT_REQUESTS: "1"
+      OLLAMA_API_BASE: "${DOCKER_OLLAMA_API_BASE:-http://host.docker.internal:11434}"
+      OLLAMA_MODEL: "${OLLAMA_MODEL:-qwen3:4b}"
+      OLLAMA_TIMEOUT_SECONDS: "${OLLAMA_TIMEOUT_SECONDS:-120}"
+      OLLAMA_KEEP_ALIVE: "${OLLAMA_KEEP_ALIVE:-10m}"
+    volumes:
+      - ./data:/app/data
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

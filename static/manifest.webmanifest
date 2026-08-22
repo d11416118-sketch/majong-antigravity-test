@@ -1,0 +1,35 @@
+{
+  "name": "台灣麻將線上牌桌",
+  "short_name": "台灣麻將",
+  "description": "台灣 16 張麻將線上牌桌",
+  "id": "/",
+  "lang": "zh-TW",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#141817",
+  "theme_color": "#17604d",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "/static/icons/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/icons/app-icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

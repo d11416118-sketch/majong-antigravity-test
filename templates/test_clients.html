@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>四人同機測試</title>
+    <style>
+        :root {
+            --felt: #17604d;
+            --ink: #101514;
+            --paper: #f8f4e8;
+            --line: rgba(248, 244, 232, 0.18);
+            --gold: #d49a2a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-width: 320px;
+            min-height: 100vh;
+            overflow: hidden;
+            color: var(--paper);
+            background: #151918;
+            font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
+        }
+
+        button,
+        input {
+            border-radius: 8px;
+            min-height: 38px;
+            font: inherit;
+        }
+
+        button {
+            border: 0;
+            padding: 0 14px;
+            color: var(--paper);
+            background: var(--felt);
+            font-weight: 900;
+            cursor: pointer;
+        }
+
+        input {
+            width: 116px;
+            border: 1px solid rgba(0, 0, 0, 0.16);
+            padding: 0 10px;
+            color: var(--ink);
+            background: var(--paper);
+        }
+
+        .shell {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            height: 100vh;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--line);
+            padding: 10px 12px;
+            background: rgba(16, 21, 20, 0.96);
+        }
+
+        .toolbar strong {
+            margin-right: auto;
+            font-size: 18px;
+        }
+
+        .toolbar a {
+            color: var(--gold);
+            font-weight: 900;
+            text-decoration: none;
+        }
+
+        .client-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+            min-height: 0;
+            padding: 8px;
+        }
+
+        .client-panel {
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr);
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #0f1413;
+        }
+
+        .client-panel header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            min-height: 34px;
+            padding: 6px 10px;
+            color: rgba(248, 244, 232, 0.78);
+            background: rgba(248, 244, 232, 0.06);
+            font-size: 13px;
+            font-weight: 900;
+        }
+
+        .client-panel a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+            background: #202124;
+        }
+
+        @media (max-width: 980px) {
+            body {
+                overflow: auto;
+            }
+
+            .shell {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .toolbar {
+                flex-wrap: wrap;
+            }
+
+            .toolbar strong {
+                flex: 1 1 100%;
+            }
+
+            .client-grid {
+                grid-template-columns: minmax(0, 1fr);
+                grid-template-rows: none;
+            }
+
+            .client-panel {
+                height: 72vh;
+                min-height: 520px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="shell">
+        <section class="toolbar">
+            <strong>四人同機測試</strong>
+            <a id="normal-link" href="/" target="_blank" rel="noreferrer">一般入口</a>
+            <button id="reload-all" type="button">重載四窗</button>
+            <button id="fresh-all" type="button">清登入</button>
+            <input id="room-code" type="text" inputmode="numeric" maxlength="6" placeholder="房號">
+            <button id="apply-room" type="button">帶房號</button>
+        </section>
+
+        <section id="client-grid" class="client-grid" aria-label="四人測試視窗"></section>
+    </main>
+
+    <script>
+        const clients = [
+            { id: "p1", label: "玩家 1" },
+            { id: "p2", label: "玩家 2" },
+            { id: "p3", label: "玩家 3" },
+            { id: "p4", label: "玩家 4" },
+        ];
+        const grid = document.getElementById("client-grid");
+        const roomInput = document.getElementById("room-code");
+
+        function buildClientUrl(clientId, options = {}) {
+            const params = new URLSearchParams(window.location.search);
+            params.set("client", clientId);
+            if (options.fresh) {
+                params.set("fresh", "1");
+            } else {
+                params.delete("fresh");
+            }
+            const roomCode = (options.roomCode ?? params.get("autojoin") ?? "").trim();
+            if (roomCode) {
+                params.set("autojoin", roomCode);
+            } else {
+                params.delete("autojoin");
+            }
+            return `/?${params.toString()}`;
+        }
+
+        function renderClients(options = {}) {
+            grid.innerHTML = "";
+            clients.forEach((client) => {
+                const src = buildClientUrl(client.id, options);
+                const panel = document.createElement("article");
+                panel.className = "client-panel";
+                panel.innerHTML = `
+                    <header>
+                        <span>${client.label}</span>
+                        <a href="${src}" target="_blank" rel="noreferrer">獨立視窗</a>
+                    </header>
+                    <iframe title="${client.label}" src="${src}"></iframe>
+                `;
+                grid.appendChild(panel);
+            });
+        }
+
+        document.getElementById("reload-all").addEventListener("click", () => {
+            renderClients({ roomCode: roomInput.value });
+        });
+
+        document.getElementById("fresh-all").addEventListener("click", () => {
+            renderClients({ fresh: true, roomCode: roomInput.value });
+        });
+
+        document.getElementById("apply-room").addEventListener("click", () => {
+            const params = new URLSearchParams(window.location.search);
+            const roomCode = roomInput.value.trim();
+            if (roomCode) {
+                params.set("autojoin", roomCode);
+            } else {
+                params.delete("autojoin");
+            }
+            window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+            renderClients({ roomCode });
+        });
+
+        document.getElementById("normal-link").href = "/";
+        roomInput.value = new URLSearchParams(window.location.search).get("autojoin") || "";
+        renderClients();
+    </script>
+</body>
+
+</html>

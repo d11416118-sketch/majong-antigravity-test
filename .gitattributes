@@ -1,0 +1,6 @@
+* text=auto
+*.bat text eol=crlf
+*.png binary
+*.glb binary
+*.fbx binary
+*.db binary
