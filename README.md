@@ -512,3 +512,14 @@ git push -u origin main
 ## 授權
 
 此專案目前尚未在倉庫中指定開源授權。若要允許其他人使用、修改或散布程式碼，請在公開前選擇合適的授權並加入 `LICENSE` 檔案。
+
+
+## 3D Character Model
+
+**Model:** Low Poly Male  
+**Original author:** [Loves_Art](https://sketchfab.com/Loves_Art) on Sketchfab  
+**Source:** [Low Poly Male](https://sketchfab.com/3d-models/low-poly-male-7d601a034c1c45e68151bddf386e48b3)  
+**License:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+
+Modified for this project, including rigging, optimization, and material adjustments.
+
