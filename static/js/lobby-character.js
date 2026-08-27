@@ -273,8 +273,8 @@ function fitModel(model, group, camera) {
     const maxDimension = Math.max(size.x * 0.82, size.y, size.z * 0.82, 0.001);
     const scale = 3.15 / maxDimension;
 
-    model.position.sub(center);
     model.scale.setScalar(scale);
+    model.position.copy(center).multiplyScalar(-scale);
     group.add(model);
 
     const fittedHeight = size.y * scale;

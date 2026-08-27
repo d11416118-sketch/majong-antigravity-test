@@ -1,4 +1,4 @@
-const CACHE_NAME = "tw-mahjong-pwa-v20";
+const CACHE_NAME = "tw-mahjong-pwa-v22";
 const SHELL_ASSETS = [
     "/",
     "/static/css/main.css",
@@ -16,6 +16,7 @@ const SHELL_ASSETS = [
     "/static/vendor/three/addons/loaders/FBXLoader.js",
     "/static/vendor/three/addons/libs/fflate.module.js",
     "/static/vendor/three/addons/curves/NURBSCurve.js",
+    "/static/vendor/three/addons/curves/NURBSUtils.js",
     "/static/vendor/three/addons/utils/BufferGeometryUtils.js",
     "/static/manifest.webmanifest",
     "/static/icons/app-icon-32.png",

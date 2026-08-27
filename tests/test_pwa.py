@@ -52,6 +52,24 @@ class TestPwaPackaging(unittest.TestCase):
         ):
             self.assertIn(name, worker)
 
+    def test_fbx_loader_dependencies_are_packaged(self):
+        worker = (ROOT / "static" / "service-worker.js").read_text(encoding="utf-8")
+        dependencies = (
+            "vendor/three/addons/loaders/FBXLoader.js",
+            "vendor/three/addons/libs/fflate.module.js",
+            "vendor/three/addons/curves/NURBSCurve.js",
+            "vendor/three/addons/curves/NURBSUtils.js",
+        )
+
+        for relative_path in dependencies:
+            self.assertTrue((ROOT / "static" / relative_path).is_file(), relative_path)
+            self.assertIn(f"/static/{relative_path}", worker)
+
+    def test_lobby_character_scales_fbx_center_translation(self):
+        viewer = (ROOT / "static" / "js" / "lobby-character.js").read_text(encoding="utf-8")
+
+        self.assertIn("model.position.copy(center).multiplyScalar(-scale);", viewer)
+
 
 if __name__ == "__main__":
     unittest.main()
